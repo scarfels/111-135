@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Практические задания по JavaScript №111–135</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1d2330;--mu:#5d6678;--ac:#1f5fbf;--ln:#d9dde5}
+@media (prefers-color-scheme:dark){:root{--bg:#14171d;--card:#1c2029;--tx:#e6e9ef;--mu:#9aa3b5;--ac:#6ea0ff;--ln:#2c3240}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 Georgia,"Times New Roman",serif}
+main{max-width:860px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:1.7rem;margin:0 0 4px}
+.sub{color:var(--mu);margin:0 0 24px}
+h3{margin:36px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--ac);font-size:1.2rem}
+section{background:var(--card);border:1px solid var(--ln);border-radius:8px;padding:14px 16px;margin:0 0 14px}
+h2{font-size:1rem;margin:0 0 8px}
+pre{margin:0;white-space:pre-wrap;word-break:break-word;font:14px/1.45 Consolas,Menlo,monospace;color:var(--mu)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+input,select,button{font:inherit;padding:6px 10px;border:1px solid var(--ln);border-radius:6px;background:var(--bg);color:var(--tx)}
+button{background:var(--ac);color:#fff;border-color:var(--ac);cursor:pointer}
+button:disabled{opacity:.5;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+table{border-collapse:collapse;width:100%}
+td,th{border:1px solid var(--ln);padding:6px 10px;text-align:left}
+.bar{height:16px;background:var(--bg);border:1px solid var(--ln);border-radius:8px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--ac)}
+.note{color:var(--mu);font-size:.9rem;margin:6px 0 0}
+#qr{margin:8px 0}
+.big{font:700 1.6rem Consolas,monospace}
+</style>
+</head>
+<body>
+<main>
+<h1>Практические задания по JavaScript №111–135</h1>
+<p class="sub">Результаты заданий 111–130 выводятся на странице и в консоль (F12 → Console). Задания 131–135 — интерактивные.</p>
+<div id="app"></div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const app = document.getElementById('app');
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+const H = t => { const h = document.createElement('h3'); h.textContent = t; app.append(h); };
+function T(n, title, fn) {
+  const d = document.createElement('section');
+  d.innerHTML = `<h2>Задание ${n}. ${title}</h2><pre></pre>`;
+  app.append(d);
+  const pre = d.querySelector('pre');
+  const log = (...a) => {
+    const s = a.map(x => typeof x === 'object' ? JSON.stringify(x) : x).join(' ');
+    pre.textContent += s + '\n';
+    console.log(`[${n}]`, s);
+  };
+  fn(log, d);
+  if (!pre.textContent) pre.remove();
+}
+
+/* ---------- Уровень A ---------- */
+H('Уровень A — Условные операторы');
+
+T(111, 'Проверка уровня сигнала Wi-Fi', log => {
+  function quality(s) {
+    if (s < 0 || s > 100) return 'Ошибка: значение должно быть от 0 до 100';
+    else if (s === 0) return 'Нет сигнала';
+    else if (s <= 30) return 'Слабый';
+    else if (s <= 70) return 'Средний';
+    else return 'Сильный';
+  }
+  let signal = 65;
+  log(`${signal}% → ${quality(signal)}`);
+  [0, 25, 95, 101].forEach(v => log(`${v}% → ${quality(v)}`));
+});
+
+T(112, 'Доступ к онлайн-курсу', log => {
+  const access = (completed, score) => completed && score >= 70 ? 'Следующий модуль доступен' : 'Доступ закрыт';
+  let completed = true, score = 75;
+  log(`${completed}, ${score} → ${access(completed, score)}`);
+  [[true, 60], [false, 90], [false, 50]].forEach(([c, s]) => log(`${c}, ${s} → ${access(c, s)}`));
+});
+
+T(113, 'Тариф мобильного интернета', log => {
+  function price(gb) {
+    if (gb < 0) return 'Ошибка: объём не может быть отрицательным';
+    else if (gb <= 5) return '1 500 ₸';
+    else if (gb <= 15) return '3 000 ₸';
+    else if (gb <= 30) return '5 000 ₸';
+    else return '7 000 ₸';
+  }
+  let internetGB = 12;
+  log(`${internetGB} ГБ → ${price(internetGB)}`);
+  [0, 5, 5.1, 15, 30, 31, -1].forEach(v => log(`${v} ГБ → ${price(v)}`));
+});
+
+T(114, 'Определение типа файла', log => {
+  function type(ext) {
+    switch (ext.toLowerCase()) {
+      case 'jpg': case 'png': return 'Изображение';
+      case 'mp4': case 'avi': return 'Видео';
+      case 'pdf': case 'docx': return 'Документ';
+      case 'js': case 'html': return 'Исходный код';
+      default: return 'Неизвестный тип';
+    }
+  }
+  let extension = 'pdf';
+  log(`${extension} → ${type(extension)}`);
+  ['PNG', 'avi', 'html', 'zip'].forEach(v => log(`${v} → ${type(v)}`));
+});
+
+T(115, 'Победитель соревнования', log => {
+  function winner(a, b) {
+    if (a > b) return 'Победил участник 1';
+    else if (b > a) return 'Победил участник 2';
+    else return 'Ничья';
+  }
+  let participant1 = 87, participant2 = 92;
+  log(`${participant1} : ${participant2} → ${winner(participant1, participant2)}`);
+  [[95, 80], [70, 70]].forEach(([a, b]) => log(`${a} : ${b} → ${winner(a, b)}`));
+});
+
+/* ---------- Уровень B ---------- */
+H('Уровень B — Циклы, строки и массивы');
+
+T(116, 'Сумма чисел, кратных семи (1–100)', log => {
+  let sum = 0, count = 0;
+  for (let i = 1; i <= 100; i++) if (i % 7 === 0) { sum += i; count++; }
+  log('Количество:', count, '| Сумма:', sum);
+});
+
+T(117, 'Анализ продаж магазина', log => {
+  let sales = [12000, 18500, 9700, 25000, 16300, 21000, 14000];
+  let sum = 0, over = 0;
+  for (const s of sales) { sum += s; if (s > 20000) over++; }
+  log('Сумма за неделю:', sum, '₸');
+  log('Средняя выручка:', (sum / sales.length).toFixed(2), '₸');
+  log('Максимум:', Math.max(...sales), '| Минимум:', Math.min(...sales));
+  log('Дней с продажами выше 20 000 ₸:', over);
+});
+
+T(118, 'Подсчёт пробелов в тексте', log => {
+  let text = 'I am learning JavaScript today', count = 0;
+  for (let i = 0; i < text.length; i++) if (text[i] === ' ') count++;
+  log('Пробелов:', count);
+});
+
+T(119, 'Замена отрицательных чисел нулями', log => {
+  let numbers = [12, -4, 7, -9, 18, -2, 5];
+  const res = [];
+  for (const n of numbers) res.push(n < 0 ? 0 : n);
+  log('Исходный:', numbers);
+  log('Новый (цикл):', res);
+  log('Новый (map):', numbers.map(n => n < 0 ? 0 : n));
+});
+
+T(120, 'Поиск самого длинного слова', log => {
+  let words = ['HTML', 'JavaScript', 'CSS', 'Programming', 'SQL'];
+  let longest = words[0];
+  for (const w of words) if (w.length > longest.length) longest = w;
+  log(`${longest} — ${longest.length} символов`);
+});
+
+T(121, 'Последовательность Фибоначчи', log => {
+  const fib = [0, 1];
+  for (let i = 2; i < 10; i++) fib.push(fib[i - 1] + fib[i - 2]);
+  log(fib.join(', '));
+});
+
+T(122, 'Повторяющиеся имена', log => {
+  let names = ['Алия', 'Арман', 'Данияр', 'Алия', 'Мадина', 'Арман'];
+  const duplicates = [];
+  for (let i = 0; i < names.length; i++) {
+    const count = names.filter(n => n === names[i]).length;
+    if (count > 1 && !duplicates.includes(names[i])) duplicates.push(names[i]);
+  }
+  log('Повторяются:', duplicates.join(', '));
+});
+
+T(123, 'Количество цифр в строке', log => {
+  let text = 'Group RPO-23-1 Room 21', count = 0;
+  for (const ch of text) if (ch >= '0' && ch <= '9') count++;
+  log(`В строке "${text}" цифр: ${count}`);
+});
+
+/* ---------- Уровень C ---------- */
+H('Уровень C — Функции и обработка объектов');
+
+T(124, 'Стоимость электроэнергии', log => {
+  function calculateElectricity(kwh, rate) {
+    if (!(kwh >= 0) || !(rate >= 0)) return NaN;
+    return kwh * rate;
+  }
+  log('250 кВт·ч × 25 ₸ =', calculateElectricity(250, 25), '₸');
+  log('120 кВт·ч × 25 ₸ =', calculateElectricity(120, 25), '₸');
+  log('Некорректный ввод (-10):', calculateElectricity(-10, 25));
+});
+
+T(125, 'Проверка имени пользователя', log => {
+  function validateUsername(u) {
+    if (u.length < 5 || u.length > 15) return false;
+    return /^[A-Za-z0-9_]+$/.test(u);
+  }
+  ['user1', 'ab', 'student_2026', 'hello world'].forEach(u => log(`"${u}" → ${validateUsername(u)}`));
+});
+
+T(126, 'Успеваемость учебной группы', log => {
+  let students = [
+    {name: 'Алия', score: 95}, {name: 'Арман', score: 76}, {name: 'Данияр', score: 48},
+    {name: 'Мадина', score: 88}, {name: 'Руслан', score: 35}
+  ];
+  function analyzeStudents(list) {
+    const passed = list.filter(s => s.score >= 50);
+    return {
+      average: list.reduce((s, x) => s + x.score, 0) / list.length,
+      passed: passed.map(s => s.name),
+      failedCount: list.length - passed.length,
+      successRate: passed.length / list.length * 100 + '%'
+    };
+  }
+  log(analyzeStudents(students));
+});
+
+T(127, 'Поиск товара по названию', log => {
+  let products = [
+    {name: 'Ноутбук', price: 280000}, {name: 'Монитор', price: 95000},
+    {name: 'Мышь', price: 7500}, {name: 'Клавиатура', price: 18000}
+  ];
+  function findProduct(name) {
+    const p = products.find(x => x.name.toLowerCase() === name.trim().toLowerCase());
+    return p ? `${p.name}: ${p.price} ₸` : 'Товар не найден';
+  }
+  ['монитор', 'МЫШЬ', 'Планшет'].forEach(n => log(`${n} → ${findProduct(n)}`));
+});
+
+T(128, 'Время выполнения задач', log => {
+  let tasks = [
+    {name: 'HTML', minutes: 45}, {name: 'CSS', minutes: 60},
+    {name: 'JavaScript', minutes: 90}, {name: 'Testing', minutes: 30}
+  ];
+  function calculateTotalTime(list) {
+    const total = list.reduce((s, t) => s + t.minutes, 0);
+    const longest = list.reduce((a, b) => b.minutes > a.minutes ? b : a);
+    return {total, h: Math.floor(total / 60), m: total % 60, longest: longest.name};
+  }
+  const r = calculateTotalTime(tasks);
+  log(`Всего: ${r.total} мин = ${r.h} ч ${r.m} мин`);
+  log('Самая долгая задача:', r.longest);
+});
+
+T(129, 'Бонусные баллы', log => {
+  function calculatePoints(amount) {
+    const percent = amount < 10000 ? 1 : amount < 30000 ? 3 : 5;
+    return Math.round(amount * percent / 100);
+  }
+  [5000, 15000, 40000].forEach(a => log(`${a} ₸ → ${calculatePoints(a)} баллов`));
+});
+
+T(130, 'Рейтинг IT-проектов', log => {
+  let projects = [
+    {title: 'Smart Campus', score: 85}, {title: 'AI Assistant', score: 97},
+    {title: 'Eco Monitor', score: 78}, {title: 'Digital Library', score: 91}
+  ];
+  const sorted = [...projects].sort((a, b) => b.score - a.score);
+  sorted.forEach((p, i) => log(`${i + 1} место: ${p.title} — ${p.score}`));
+  log('Победитель:', sorted[0].title);
+  log('Средний балл:', projects.reduce((s, p) => s + p.score, 0) / projects.length);
+  log('От 90 баллов:', projects.filter(p => p.score >= 90).map(p => p.title).join(', '));
+});
+
+/* ---------- Уровень D ---------- */
+H('Уровень D — Разработка веб-приложений');
+
+T(131, 'Калькулятор потребления воды', (l, d) => {
+  d.insertAdjacentHTML('beforeend', `<div class="row"><input id="wk" type="number" placeholder="Масса тела, кг"><button id="wb">Рассчитать</button></div><p id="wr"></p><div class="bar"><i id="wf"></i></div><p class="note">Учебная формула: 30 мл на 1 кг. Это не медицинская рекомендация. Шкала: 0–4 л.</p>`);
+  $('wb').onclick = () => {
+    const kg = parseFloat($('wk').value);
+    if (!(kg > 0 && kg < 500)) { $('wr').textContent = 'Введите массу тела от 1 до 500 кг'; $('wf').style.width = '0'; return; }
+    const ml = kg * 30, L = ml / 1000;
+    $('wr').textContent = `${ml} мл = ${L.toFixed(2)} л в день`;
+    $('wf').style.width = Math.min(100, L / 4 * 100) + '%';
+  };
+});
+
+T(132, 'Генератор QR-кода', (l, d) => {
+  d.insertAdjacentHTML('beforeend', `<div class="row"><input id="qi" type="text" placeholder="Ссылка" size="30"><button id="qb">Создать QR</button><button id="qc">Очистить</button><button id="qs" disabled>Сохранить PNG</button></div><div id="qr"></div><p class="note" id="qm"></p>`);
+  $('qb').onclick = () => {
+    const v = $('qi').value.trim();
+    if (!v) { $('qm').textContent = 'Введите ссылку'; return; }
+    if (typeof QRCode === 'undefined') { $('qm').textContent = 'Библиотека QR не загрузилась — проверьте подключение к интернету'; return; }
+    $('qr').innerHTML = '';
+    new QRCode($('qr'), {text: v, width: 200, height: 200});
+    $('qm').textContent = '';
+    $('qs').disabled = false;
+  };
+  $('qc').onclick = () => { $('qi').value = ''; $('qr').innerHTML = ''; $('qm').textContent = ''; $('qs').disabled = true; };
+  $('qs').onclick = () => {
+    const c = $('qr').querySelector('canvas');
+    if (!c) return;
+    const a = document.createElement('a');
+    a.href = c.toDataURL('image/png');
+    a.download = 'qr.png';
+    a.click();
+  };
+});
+
+T(133, 'Таблица умножения', (l, d) => {
+  d.insertAdjacentHTML('beforeend', `<div class="big" id="mq"></div><div class="row"><input id="ma" type="number" placeholder="Ответ"><button id="mb">Проверить</button><button id="mn">Начать заново</button></div><p id="mp"></p>`);
+  let a, b, cnt, right;
+  const next = () => {
+    a = 1 + Math.floor(Math.random() * 10); b = 1 + Math.floor(Math.random() * 10);
+    $('mq').textContent = `${a} × ${b} = ?`; $('ma').value = '';
+    $('mp').textContent = `Пример ${cnt + 1} из 10. Верных: ${right}`;
+  };
+  const start = () => { cnt = 0; right = 0; $('mb').disabled = false; next(); };
+  $('mb').onclick = () => {
+    const v = parseInt($('ma').value);
+    if (isNaN(v)) { $('mp').textContent = 'Введите число'; return; }
+    cnt++;
+    if (v === a * b) right++;
+    if (cnt === 10) { $('mq').textContent = 'Тест завершён'; $('mp').textContent = `Результат: ${right} из 10`; $('mb').disabled = true; }
+    else next();
+  };
+  $('mn').onclick = start;
+  start();
+});
+
+T(134, 'Менеджер расходов', (l, d) => {
+  d.insertAdjacentHTML('beforeend', `<div class="row"><input id="en" type="text" placeholder="Название"><input id="es" type="number" placeholder="Сумма, ₸"><button id="ea">Добавить</button></div><table id="et"></table><p class="big" id="etot"></p>`);
+  let list = load('expenses134') || [];
+  const render = () => {
+    $('et').innerHTML = list.map((x, i) => `<tr><td>${esc(x.name)}</td><td>${x.sum} ₸</td><td><button data-i="${i}">Удалить</button></td></tr>`).join('');
+    $('etot').textContent = 'Всего: ' + list.reduce((s, x) => s + x.sum, 0) + ' ₸';
+  };
+  $('ea').onclick = () => {
+    const name = $('en').value.trim(), sum = parseFloat($('es').value);
+    if (!name || !(sum > 0)) return;
+    list.push({name, sum}); save('expenses134', list);
+    $('en').value = $('es').value = ''; render();
+  };
+  $('et').onclick = e => {
+    if (e.target.dataset.i === undefined) return;
+    list.splice(+e.target.dataset.i, 1); save('expenses134', list); render();
+  };
+  render();
+});
+
+T(135, 'Электронный журнал оценок', (l, d) => {
+  d.insertAdjacentHTML('beforeend', `<div class="row"><input id="jn" type="text" placeholder="ФИО студента"><input id="js" type="number" min="0" max="100" placeholder="Баллы 0–100"><button id="ja">Добавить студента</button></div>
+  <div class="row"><input id="jq" type="search" placeholder="Поиск по имени"><button id="jt">Сортировать по баллам</button><button id="je">Экспорт CSV</button></div>
+  <table id="jtb"></table><p class="big" id="jav"></p><p class="note">Уровни: от 90 — Отлично, от 75 — Хорошо, от 50 — Удовлетворительно, ниже 50 — Не сдал. Используйте вымышленные данные.</p>`);
+  let st = load('journal135') || [], q = '', dir = 0;
+  const lvl = s => s >= 90 ? 'Отлично' : s >= 75 ? 'Хорошо' : s >= 50 ? 'Удовлетворительно' : 'Не сдал';
+  const render = () => {
+    let r = st.map((x, i) => ({...x, i})).filter(x => x.name.toLowerCase().includes(q));
+    if (dir) r.sort((a, b) => dir * (a.score - b.score));
+    $('jtb').innerHTML = '<tr><th>ФИО</th><th>Баллы</th><th>Уровень</th><th></th></tr>' +
+      (r.length ? r.map(x => `<tr><td>${esc(x.name)}</td><td>${x.score}</td><td>${lvl(x.score)}</td><td><button data-i="${x.i}">Удалить</button></td></tr>`).join('') : '<tr><td colspan="4">Записей нет</td></tr>');
+    $('jav').textContent = 'Средний балл группы: ' + (st.length ? (st.reduce((s, x) => s + x.score, 0) / st.length).toFixed(1) : '—');
+  };
+  $('ja').onclick = () => {
+    const name = $('jn').value.trim(), score = parseFloat($('js').value);
+    if (!name || !(score >= 0 && score <= 100)) { alert('Введите ФИО и баллы от 0 до 100'); return; }
+    st.push({name, score}); save('journal135', st);
+    $('jn').value = $('js').value = ''; render();
+  };
+  $('jq').oninput = e => { q = e.target.value.trim().toLowerCase(); render(); };
+  $('jt').onclick = () => { dir = dir === -1 ? 1 : -1; render(); };
+  $('jtb').onclick = e => {
+    if (e.target.dataset.i === undefined) return;
+    st.splice(+e.target.dataset.i, 1); save('journal135', st); render();
+  };
+  $('je').onclick = () => {
+    const csv = '\uFEFFФИО;Баллы;Уровень\n' + st.map(x => `"${x.name.replace(/"/g, '""')}";${x.score};${lvl(x.score)}`).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8'}));
+    a.download = 'journal.csv';
+    a.click();
+  };
+  render();
+});
+</script>
+</body>
+</html>
